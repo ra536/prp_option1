@@ -10,6 +10,13 @@ int N = 11;
 // int sizeA = 100;
 // char A[100] = "jeeves";
 
+int quadraticProbing(){
+	// for loop (until all spots visited?
+	// calculate simpleHash with extra bit
+	// return index to insert into hash table
+	return 0;
+}
+
 int simpleHash(char *k){
 	int idx=0;
 	int sum=0;
@@ -18,6 +25,10 @@ int simpleHash(char *k){
 		idx++;
 	}
 	return (sum-2) % N;
+}
+
+int hashFunction(char *k, int i){
+	return (simpleHash(k) + (i * i)) % N;
 }
 
 int needGrow(char *word, int wordSize, char *array, int arraySize, int lastIdx){
@@ -60,7 +71,9 @@ void addToTable(char *table[], int tableIdx, char *array, int lastIdx){
 
 void printHashContents(char *table[], int size){
 	for(int i=0; i < size; i++){
-		printf("%p\n", table[i]);
+		printf("%p: %p  |  %ld: %s (%ld)\n", &table[i], table[i], &table[i]-&table[0], table[i], table[i]-table[0]);
+		//printf("%p: %p\n", &table[i], table[i]);
+		//printf("%p -- %p\n", &table[0], table[0]);
 	}
 }
 
