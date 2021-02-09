@@ -28,31 +28,51 @@ int appendToArray(char *word, int wordSize, char *originalArray, int arraySize, 
 		i++;
 	}
 	originalArray[lastIdx+i]='\0';
-	printf("%s\n", &originalArray[lastIdx]);
+	// printf("%p\n", (int *) &originalArray[lastIdx]);
 	return lastIdx+i+1; // add the 0B
 }
 
 char *resizeArray(char *originalArray, char *newArray, int oldSize, int newSize){
-	strcpy(newArray, originalArray);
+	for(int i=0; i<oldSize; i++){
+		newArray[i] = originalArray[i];
+	}
+	//strcpy(newArray, originalArray);
 	return newArray;
 }
 
+void printArrayContentsAddress(char *array, int size){
+	int idx=0;
+
+	while(idx < size){
+		int wordIdx=0;
+		int readIdx=idx;
+		char word[30];
+		while(array[readIdx] != '\0'){
+			word[wordIdx] = array[readIdx];
+			// printf("%c\n", word[wordIdx]);
+			readIdx++;
+			wordIdx++;
+		}
+		word[wordIdx] = '\0';
+		printf("%p: %s\n", &array[idx], word);
+		idx=readIdx+1;
+	}
+}
+
+void printArrayContentsNormal(char *array, int size){
+	for(int i=0; i<size; ++i){
+		if(array[i]=='\0')
+			printf("\\");
+		else 
+			printf("%c", array[i]);
+	}
+	printf("\n");
+}
+
 int main(){
-	T[N-1] = '\0';
-	A[99] = '\0';
-	printf("Hello world\n");
 	char input[] = "alex";
 	cout << to_string(simpleHash(input)) << endl;
-	printf("%s\n", T);
-	printf("%s\n", A);
-	cout << (int *) &A[0] << endl;
-	cout << (int *) &A[1] << endl;
-	cout << (int *) &A[99] << endl;
-	char boy[4] = "hi!";
-	char girl[20];
-	strcpy(girl, boy);
-	strcat(girl, " how are you?");
-	printf("%s", girl);
+	cout << endl;
 
 	char first[20];
 	char inp[4] = "the";
@@ -60,12 +80,25 @@ int main(){
 	while (20-last >= 4){
 		last = appendToArray(inp, 4, first, 20, last);
 	}
-	for(int i=0; i<20; ++i){
-		if(first[i]=='\0')
-			printf("@,");
-		else 
-			printf("%c,",first[i]);
+	char second[50];
+	char inp2[6] = "other";
+
+	resizeArray(first, second, 20, 50);
+	
+	while (50-last >= 6){
+		last = appendToArray(inp2, 6, second, 50, last);
 	}
+
+	printf("--FIRST-----------\n");
+	printArrayContentsNormal(first, 20);
+	printArrayContentsAddress(first, 20);
+
+	cout << endl;
+	printf("--SECOND----------\n");
+	printArrayContentsNormal(second, 50);
+	printArrayContentsAddress(second, 50);
+	
+	cout << endl;
 	return 0;
 }
 
