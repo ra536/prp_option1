@@ -159,6 +159,7 @@ int main(){
 	printHashContents(hashTableSecond, 10);
 
 	cout << endl;
+
 	return 0;
 }
 
