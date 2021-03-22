@@ -10,22 +10,9 @@ char *A;
 int *T;
 int lastIdx = 0;
 
+void increaseSizeT(int newSize);
+
 // stick with pointers or try index (must reserve 0 or " ")
-
-void increaseSizeT(int newSize){
-	// create larger A
-	char *ptrA = A;
-	// A = createArrayA(newSize);
-	for(int i=0; i < sizeT; ++i){
-		A[i] = ptrA[i];
-	}
-	free(ptrA);
-
-	// delete from T
-	// insert to new T
-	//
-
-}
 
 void printHashContents(){
 	for(int i=0; i < sizeT; i++){
@@ -47,7 +34,7 @@ void printArrayContents(){
 	printf("\n");
 }
 
-int simpleHash(string k){
+int simpleHash(string k, int sizeT){
 	int idx=0;
 	int sum=0;
 	while(idx < k.length()){
@@ -57,11 +44,12 @@ int simpleHash(string k){
 	return (sum-2) % sizeT;
 }
 
-int hashFunction(string k, int i){
-	return (simpleHash(k) + (i * i)) % sizeT;
+int hashFunction(string k, int i, int sizeT){
+	//cout << "HASH: " << k << " " << i << " " << sizeT << " " << (simpleHash(k, sizeT) + (i * i) % sizeT) << endl;
+	return (simpleHash(k, sizeT) + (i * i)) % sizeT;
 }
 
-void appendToArray(string k){
+void appendToArray(char *A, string k){
 	int i;
 	for(i=0; i < k.length(); ++i){
 		A[lastIdx + i] = k[i];
@@ -74,7 +62,7 @@ int search(string k){
 	int idx;
 	int found;
 	for(int i=0; i < sizeT; ++i){
-		idx = hashFunction(k, i);
+		idx = hashFunction(k, i, sizeT);
 		// cout << "HASH " << k << ":" << i << endl;
 		//cout << "IDX " << idx << endl;
 		if(T[idx] != -1){
@@ -93,7 +81,7 @@ int search(string k){
 			}
 			//cout << found << " FOUND?" << endl;
 			if (found != 0){
-				cout << "WENT THROUGH LOOP" << endl;
+				//cout << "WENT THROUGH LOOP" << endl;
 			}
 			if (found != 0 && A[T[idx] + j] == '\0'){
 				found = 1;
@@ -104,18 +92,18 @@ int search(string k){
 	return -1;
 }
 
-void deleteWordAtIndex(int i){
+void deleteWordAtIndex(char *A, int i){
 	while(A[i] != '\0'){
 		A[i] = '*';
 		++i;
 	}
 }
 
-void deleteString(string k){
+void deleteString(int *T, char *A, string k){
 	int idx = search(k);
 	if(idx != -1){
 		int arrayIdx = T[idx];
-		deleteWordAtIndex(arrayIdx);
+		deleteWordAtIndex(A, arrayIdx);
 		T[idx] = -1;
 		cout << k << " deleted from slot " << idx << endl;
 	}
@@ -124,25 +112,56 @@ void deleteString(string k){
 void insert(string k){
 	int idx;
 	int found = 0;
+	int sizeinc = 0;
 	for(int i=0; i < sizeT; ++i){
-		idx = hashFunction(k, i);
+		idx = hashFunction(k, i, sizeT);
 		if(T[idx] == -1){
 			found = 1;
 			if(lastIdx + k.length() + 1 <= 15 * sizeT){
 				T[idx] = lastIdx;
-				cout << "TOOK " << i << " TIMES" << endl;
-				appendToArray(k);
+				// cout << "TOOK " << i << " TIMES" << endl;
+				appendToArray(A, k);
+				break;
+			} else {
+				//cout << "Word doesn't fit in " << 15 * sizeT << endl;
+				increaseSizeT(2 * sizeT);
+				sizeinc = 1;
 				break;
 			}
+			//insert(k);
 			// grow array
 			// run again
 		}
 	} 
 	if(!found){
+		//cout << "Doesn't hash well" << endl;
+		increaseSizeT(2 * sizeT);
+		sizeinc = 1;
 		// grow array
 		// run again
 	}
-	
+	if(sizeinc == 1){
+		// printArrayContents();
+		// printHashContents();
+		insert(k);
+	}
+}
+
+void insertWithAllInfo(int *T, int sizeT, int aIndex, string k){
+	// tIndex
+	int idx;
+	int found = 0;
+	// cout << '[' << k << ']' << endl;
+	for(int i=0; i < sizeT; ++i){
+		idx = hashFunction(k, i, sizeT);
+		if(T[idx] == -1){
+			if(lastIdx + k.length() + 1 <= 15 * sizeT){
+				// cout << k << " placed at " << idx << endl;
+				T[idx] = aIndex;
+				break;
+			}
+		}
+	}
 }
 
 int *createHashT(int N){
@@ -159,7 +178,7 @@ char *createArrayA(int N){
 	char *newArray = (char *)calloc(15*N, sizeof(char));
 	for(int i=0; i < 15*N; ++i){
 		//cout << "[" << newArray[i] << "]" << endl;
-		newArray[i] = ' ';
+		newArray[i] = '.';
 	}
 
 	return &newArray[0];
@@ -172,23 +191,23 @@ void multiplexor(string opCode, string argument){
 	if(opCode.length() == 2){
 		switch(stoi(opCode)){
 			case 10:
-				cout << "INSERT " << argument << "\t(" << opCode << ")" << endl;
+				// cout << "INSERT " << argument << "\t(" << opCode << ")" << endl;
 				insert(argument);
-				cout << "A" << endl;
-				printArrayContents();
-				cout << "T" << endl;
-				printHashContents();
+				// cout << "A" << endl;
+				// printArrayContents();
+				// cout << "T" << endl;
+				// printHashContents();
 				break;
 			case 11:
-				cout << "DELETE " << argument << "\t(" << opCode << ")" << endl;
-				deleteString(argument);
-				cout << "A" << endl;
-				printArrayContents();
-				cout << "T" << endl;
-				printHashContents();
+				// cout << "DELETE " << argument << "\t(" << opCode << ")" << endl;
+				deleteString(T, A, argument);
+				// cout << "A" << endl;
+				// printArrayContents();
+				// cout << "T" << endl;
+				// printHashContents();
 				break;
 			case 12:
-				cout << "SEARCH " << argument << "\t(" << opCode << ")" << endl;
+				// cout << "SEARCH " << argument << "\t(" << opCode << ")" << endl;
 				int f;
 				f = search(argument);
 				if(f == -1){
@@ -199,9 +218,11 @@ void multiplexor(string opCode, string argument){
 				break;
 			case 13:
 				// cout << "PRINT " << "\t\t(" << opCode << ")" << endl;
+				printArrayContents();
+				printHashContents();
 				break;
 			case 14: {
-				cout << "CREATE " << argument << "\t(" << opCode << ")" << endl;
+				// cout << "CREATE " << argument << "\t(" << opCode << ")" << endl;
 				int N = stoi(argument);
 				sizeT = N;
 				T = createHashT(N);
@@ -271,6 +292,42 @@ void parseLine(string line){
 	//cout << argument << endl;
 };
 
+void increaseSizeT(int newSize){
+	// create larger A
+	char *newA = createArrayA(newSize);
+	for(int i=0; i < 15*sizeT; ++i){
+		newA[i] = A[i];
+	}
+	// pass changes to global A
+	// A = newA;
+
+	int *newT = createHashT(newSize);
+
+	for(int i=0; i < sizeT; ++i){
+		if(T[i] != -1){
+			// 
+			string word;
+			int j = 0;
+			while(A[T[i] + j] != '\0'){
+				word += A[T[i] + j];
+				++j;
+			}
+			// DON'T INSERT AT T[i], since it must be recalculated
+			insertWithAllInfo(newT, newSize, T[i], word);
+			// deleteString(T, A, word);
+			// Modify the insert code so that it takes in the index of the string ()
+		}
+	}
+
+	A = newA;
+	T = newT;
+	sizeT = newSize;
+	// delete from T
+	// insert to new T
+	//
+
+}
+
 int main(int argc, char *argv[]){
 	if(argc > 1){
 		ifstream inFile;
@@ -280,6 +337,9 @@ int main(int argc, char *argv[]){
 			parseLine(line);
 		}
 	}
+	// increaseSizeT(20);
+	// printArrayContents();
+	// printHashContents();
 
 	// for(int i=0; i < 11; ++i){
 	// 	cout << hashFunction("jerry", i) << " ";

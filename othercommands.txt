@@ -1,0 +1,12 @@
+14 2
+10 alex
+10 jerry
+12 alex
+12 jerry
+13
+10 tom
+13
+12 alex
+12 tom
+12 jerry
+13
